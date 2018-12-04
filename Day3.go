@@ -14,6 +14,15 @@ var areaWidth = 1000 // 10
 var areaHeight =  1000 // 8
 var pattern = regexp.MustCompile(`#(\d+)\s@\s(\d+),(\d+):\s(\d+)x(\d+)`)
 
+func contains(list []int, search int) bool {
+    for _, item := range list {
+        if item == search {
+            return true
+        }
+    }
+    return false
+}
+
 func getLines() []string {
     file, err := os.Open("data/day3-input.txt")
 
@@ -72,10 +81,11 @@ func parse(claim string) []string {
     return matches
 }
 
-func part1() {
+func part1_and_part2(part string) {
     lines := getLines()
     area := getFabricArea(areaWidth, areaHeight)
 
+    var ids []int
     var overLappingClaims []int
     var overLappingCount = 0
 
@@ -85,6 +95,8 @@ func part1() {
 
         // Map the claim into the area
         id, _ := strconv.Atoi(claim[1])
+        ids = append(ids, id)
+
         leftCord, _ := strconv.Atoi(claim[2])
         topCord, _ := strconv.Atoi(claim[3])
         width, _ := strconv.Atoi(claim[4])
@@ -106,16 +118,40 @@ func part1() {
                         overLappingCount += 1
                     }
 
-                    overLappingClaims = append(overLappingClaims, id)
+                    // Add the overlapping ID
+                    if !contains(overLappingClaims, id) {
+                        overLappingClaims = append(overLappingClaims, id)
+                    }
+
+                    var previousId = row[colIndex]
+
+                    if previousId != overlapped {
+                        // If the previous id had not been overlapped before
+                        // it wont be in the list, we need to add it also
+                        if !contains(overLappingClaims, previousId) {
+                            overLappingClaims = append(overLappingClaims, previousId)
+                        }
+                    }
+
+                    // Mark the area as overlapped...
                     row[colIndex] = overlapped
                 }
             }
         }
     }
 
-    drawArea(area)
+    if part == "part2" {
+        fmt.Printf("Overlapping ID's: %d\n", len(overLappingClaims))
 
-    fmt.Printf("Overlapping area: %d\n", overLappingCount)
+        for _, id := range ids {
+            if !contains(overLappingClaims, id) {
+                fmt.Printf("Non overlapped claim is: %d\n", id)
+            }
+        }
+    } else {
+        // drawArea(area)
+        fmt.Printf("Overlapping area: %d\n", overLappingCount)
+    }
 }
 
 func main() {
@@ -127,9 +163,5 @@ func main() {
 
     part := string(args[0])
 
-    if part == "part1" {
-        part1()
-    } else if part == "part2" {
-
-    }
+    part1_and_part2(part)
 }
