@@ -20,6 +20,8 @@ type logEntry struct {
 type guardLog struct {
     sleepyTime  int
     popularMins []int
+    favMin      int
+    favMinTime  int
 }
 
 var layout = "2006-01-02 15:04"
@@ -37,6 +39,7 @@ func getMinArray() []int {
 
 func getLines() []string {
     file, err := os.Open("data/day4-input.txt")
+    //file, err := os.Open("tests/input/day4.txt")
 
     if err != nil {
         log.Fatal(err)
@@ -56,7 +59,7 @@ func getLines() []string {
     return lines
 }
 
-func part1_and_part2(part string) {
+func getGuardLogs() map[string]guardLog {
     lines := getLines()
 
     var logs []logEntry
@@ -125,6 +128,12 @@ func part1_and_part2(part string) {
         }
     }
 
+    return guardLogs
+}
+
+func part1() {
+    guardLogs := getGuardLogs()
+
     var sleepyGuard string
     var sleepyMins = 0
 
@@ -150,17 +159,47 @@ func part1_and_part2(part string) {
     fmt.Printf("Most popular min: %d with %d asleep mins\n", mostPopularMin, mostPopularMinTime)
 
     guardId, _ := strconv.Atoi(sleepyGuard)
-    checksum :=  guardId * mostPopularMin
+    checksum := guardId * mostPopularMin
 
-    if part == "part1" {
-        fmt.Printf("Checksum is: %d\n", checksum)
-    } else if part == "part2" {
-
-    }
+    fmt.Printf("Checksum is: %d\n", checksum)
 }
 
 func part2() {
+    guardLogs := getGuardLogs()
 
+    var overallGuard string
+    var overallFavMin = 0
+    var overallFavMinTime = 0
+
+    for guard, guardLogData := range guardLogs {
+        var favMin = 0
+        var favMinTime = 0
+
+        for min, time := range guardLogData.popularMins {
+            if time > favMinTime {
+                favMinTime = time
+                favMin = min
+            }
+        }
+
+        guardLogData.favMin = favMin
+        guardLogData.favMinTime = favMinTime
+
+        if favMinTime > overallFavMinTime {
+            overallFavMinTime = favMinTime
+            overallFavMin = favMin
+            overallGuard = guard
+        }
+
+        guardLogs[guard] = guardLogData
+    }
+
+    fmt.Printf("Guard %s was asleep for %d at %d\n", overallGuard, overallFavMin, overallFavMinTime)
+
+    guardId, _ := strconv.Atoi(overallGuard)
+    checksum := guardId * overallFavMin
+
+    fmt.Printf("Checksum is: %d\n", checksum)
 }
 
 func main() {
@@ -172,5 +211,9 @@ func main() {
 
     part := string(args[0])
 
-    part1_and_part2(part)
+    if part == "part1" {
+        part1()
+    } else if part == "part2" {
+        part2()
+    }
 }
