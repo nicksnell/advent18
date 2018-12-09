@@ -19,7 +19,7 @@ func contains(list []reflect.Value, search string) bool {
 }
 
 func getLines() []string {
-    file, err := os.Open("data/day2-input.txt")
+    file, err := os.Open("data/day2.txt")
 
     if err != nil {
         log.Fatal(err)

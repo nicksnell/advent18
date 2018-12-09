@@ -24,7 +24,7 @@ func contains(list []int, search int) bool {
 }
 
 func getLines() []string {
-    file, err := os.Open("data/day3-input.txt")
+    file, err := os.Open("data/day3.txt")
 
     if err != nil {
         log.Fatal(err)

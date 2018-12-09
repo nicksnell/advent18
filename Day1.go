@@ -9,7 +9,7 @@ import (
 )
 
 func findFrequency(frequency int) int {
-    file, err := os.Open("data/day1-input.txt")
+    file, err := os.Open("data/day1.txt")
 
     if err != nil {
         log.Fatal(err)
