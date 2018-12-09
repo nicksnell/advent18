@@ -10,8 +10,6 @@ import (
     "sort"
 )
 
-var equalDistance = 99999
-
 type location struct {
     id          int
     x           int
@@ -23,6 +21,13 @@ type location struct {
 type manhatten struct {
     id          int
     distance    int
+}
+
+func abs(value int) int {
+    if value < 0 {
+        value = value * -1
+    }
+    return value
 }
 
 func getLines() []string {
@@ -61,7 +66,7 @@ func getGrid(maxX int, maxY int) [][]int {
     return grid
 }
 
-func part1() {
+func getLocationsAndGrid() (map[string]location, [][]int, []int) {
     points := getLines()
 
     // Maximum bounds
@@ -100,6 +105,29 @@ func part1() {
         grid[y][x] = 100 + location.id
     }
 
+    var extent = []int{maxX, maxY}
+
+    return locations, grid, extent
+}
+
+func drawGrid(grid [][]int) {
+    // Visual grid for debugging
+    for _, row := range grid {
+        for _, col := range row {
+            fmt.Printf("%d, ", col)
+        }
+        fmt.Printf("\n")
+    }
+}
+
+func part1() {
+    locations, grid, extent := getLocationsAndGrid()
+
+    var equalDistance = 99999
+
+    maxX := extent[0]
+    maxY := extent[1]
+
     // For each space on the grid, compute the Manhattan distance
     // to each location. The nearest location should have it's ID
     // marked in the grid, and recored. Equidistant spaces are note
@@ -119,22 +147,9 @@ func part1() {
                 xOffset := x - location.x
                 yOffset := y - location.y
 
-                if xOffset < 0 {
-                    xOffset = xOffset * -1
-                }
+                manhattenDistance := abs(xOffset) + abs(yOffset)
 
-                if yOffset < 0 {
-                    yOffset = yOffset * -1
-                }
-
-                manhattenDistance := xOffset + yOffset
-
-                // For comparisson, only use positive ints
-                if manhattenDistance < 0 {
-                    manhattenDistance = manhattenDistance * -1
-                }
-
-                var result = manhatten{id: location.id, distance: manhattenDistance}
+                var result = manhatten{id: location.id, distance: abs(manhattenDistance)}
                 distances = append(distances, result)
             }
 
@@ -183,16 +198,40 @@ func part1() {
 
     fmt.Printf("Largest area is #%d with %d close spaces\n", largestAreaId, (largestArea + 1))
 
-    // for _, row := range grid {
-    //     for _, col := range row {
-    //         fmt.Printf("%d, ", col)
-    //     }
-    //     fmt.Printf("\n")
-    // }
+    // drawGrid(grid)
 }
 
 func part2() {
+    locations, grid, _ := getLocationsAndGrid()
 
+    //var maximumManhattenDistance = 32
+    var maximumManhattenDistance = 10000
+
+    var safeRegion = 88888
+    var safeRegionSize = 0
+
+    for y, row := range grid {
+        for x, _ := range row {
+            var totalManhattenDistance = 0
+
+            for _, location := range locations {
+                xOffset := x - location.x
+                yOffset := y - location.y
+                manhattenDistance := abs(xOffset) + abs(yOffset)
+
+                totalManhattenDistance += manhattenDistance
+            }
+
+            if totalManhattenDistance < maximumManhattenDistance {
+                safeRegionSize += 1
+
+                // Update the grid for visual representation
+                grid[y][x] = safeRegion
+            }
+        }
+    }
+
+    fmt.Printf("Safe region size is: %d\n", safeRegionSize)
 }
 
 func main() {
